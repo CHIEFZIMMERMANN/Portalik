@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Portal.API.Data;
 
 namespace Portal.API.Controllers;
 
@@ -11,22 +13,50 @@ public class WeatherForecastController : ControllerBase
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
+    private readonly DataContext _context;
     private readonly ILogger<WeatherForecastController> _logger;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, DataContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    public async Task<IActionResult> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var values = await _context.Values.ToListAsync();
+        return Ok(values);
+    }
+
+    [HttpGet(Name = "GetWeatherForecast/{id}")]
+    public IActionResult Get(int id)
+    {
+        var value = _context.Values.FirstOrDefault(x => x.Id == id);
+        return Ok(value);
+    }
+
+    [HttpPost]
+    public void AddValue([FromBody] WeatherForecast value)
+    {
+        _context.Values.Add(value);
+        _context.SaveChanges();
+    }
+
+    [HttpPut("{id}")]
+    public void EditValue(int id, [FromBody] WeatherForecast value)
+    {
+        var data = _context.Values.Find(id);
+        data.Summary = value.Summary;
+        _context.Values.Update(data);
+        _context.SaveChanges();
+    }
+
+    [HttpDelete("{id}")]
+    public void DeleteValue(int id)
+    {
+        var data = _context.Values.Find(id);
+        _context.Remove(data);
+        _context.SaveChanges();
     }
 }
