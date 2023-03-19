@@ -14,7 +14,7 @@ namespace Portal.API.Data
             
         }
         
-        public DbSet<WeatherForecast> Values {get; set;}
+        public DbSet<Value> Values {get; set;}
         public DbSet<User> Users {get; set;}
     }
 }

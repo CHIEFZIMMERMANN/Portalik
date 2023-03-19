@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Portal.API.Models
 {
-    public class ValueModel
+    public class Value
     {
         public int Id {get; set;}
         public string? Name {get; set;}
